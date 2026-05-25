@@ -1,1 +1,21 @@
-
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ data['title'] }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-pink-50 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center border border-pink-200">
+        <div class="text-4xl mb-4">💝</div>
+        <h1 class="text-2xl font-bold text-pink-600 mb-2">Thân gửi {{ data['girl_name'] }},</h1>
+        <p class="text-gray-700 leading-relaxed italic bg-pink-100/50 p-4 rounded-xl">
+            "{{ data['love_message'] }}"
+        </p>
+        <div class="mt-6 text-xs text-gray-400">
+            Trang web được khởi tạo tự động hệ thống Admin
+        </div>
+    </div>
+</body>
+</html>
