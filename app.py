@@ -5,35 +5,37 @@ import pymysql
 from urllib.parse import urlparse
 import json
 from datetime import datetime
-import hashlib
 
 app = Flask(__name__, template_folder='.', static_folder='.')
 
-# Cấu hình session
-app.secret_key = os.environ.get("FLASK_SECRET_KEY", "chuoi-bi-mat-mac-dinh-khi-chay-local")
+# ==================== LẤY CẤU HÌNH TỪ ENVIRONMENT VARIABLES ====================
+# Bắt buộc phải có FLASK_SECRET_KEY trên Railway
+app.secret_key = os.environ.get("FLASK_SECRET_KEY")
+if not app.secret_key:
+    raise ValueError("❌ Thiếu biến môi trường FLASK_SECRET_KEY! Hãy thêm nó trên Railway.")
 
-ADMIN_USERNAME = 'admin'
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
+ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")  # Có thể tùy chỉnh
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
+if not ADMIN_PASSWORD:
+    raise ValueError("❌ Thiếu biến môi trường ADMIN_PASSWORD! Hãy thêm nó trên Railway.")
+
+# Database URL - bắt buộc phải có trên Railway
+DATABASE_URL = os.environ.get("DATABASE_URL") or os.environ.get("MYSQL_URL")
+if not DATABASE_URL:
+    raise ValueError("❌ Thiếu biến môi trường DATABASE_URL hoặc MYSQL_URL! Hãy thêm database trên Railway.")
 
 # ==================== HÀM KẾT NỐI DATABASE ====================
 def get_db_connection():
-    db_url = os.environ.get("DATABASE_URL")
-    if not db_url:
-        # Fallback local (bạn có thể sửa lại thông số của mình)
-        return pymysql.connect(
-            host='localhost',
-            user='root',
-            password='',
-            database='howiloveyou',
-            cursorclass=pymysql.cursors.DictCursor,
-            charset='utf8mb4'
-        )
-    url = urlparse(db_url)
+    url = urlparse(DATABASE_URL)
+    
+    # Xóa bỏ các tham số ?options=... trong path nếu có
+    database = url.path[1:].split('?')[0]
+    
     return pymysql.connect(
         host=url.hostname,
         user=url.username,
         password=url.password,
-        database=url.path[1:],
+        database=database,
         port=url.port or 3306,
         cursorclass=pymysql.cursors.DictCursor,
         charset='utf8mb4'
@@ -69,7 +71,7 @@ def logout():
     session.pop('admin_logged_in', None)
     return jsonify({'success': True, 'message': 'Đã đăng xuất'})
 
-# ==================== API: LẤY DANH SÁCH TOOL TỪ FILE (giữ nguyên) ====================
+# ==================== API: LẤY DANH SÁCH TOOL TỪ FILE ====================
 @app.route('/api/cactrang')
 @login_required
 def get_cactrang():
@@ -96,15 +98,12 @@ def dashboard_stats():
     try:
         conn = get_db_connection()
         with conn.cursor() as cur:
-            # Tổng số trang
             cur.execute("SELECT COUNT(*) as total FROM love_pages")
             total_pages = cur.fetchone()['total']
             
-            # Tổng lượt xem
             cur.execute("SELECT COALESCE(SUM(views), 0) as total_views FROM love_pages")
             total_views = cur.fetchone()['total_views']
             
-            # Top 5 trang xem nhiều nhất
             cur.execute("""
                 SELECT title, slug, views 
                 FROM love_pages 
@@ -113,7 +112,6 @@ def dashboard_stats():
             """)
             top_pages = cur.fetchall()
             
-            # Thống kê theo tháng (6 tháng gần nhất)
             cur.execute("""
                 SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count
                 FROM love_pages
@@ -122,7 +120,6 @@ def dashboard_stats():
                 ORDER BY month ASC
             """)
             monthly_stats = cur.fetchall()
-            
         conn.close()
         
         return jsonify({
@@ -201,7 +198,7 @@ def create_page():
     love_message = data.get('love_message', '').strip()
     template_id = data.get('template_id', 'default').strip()
     
-    # Xử lý upload ảnh (nếu có file)
+    # Xử lý upload ảnh
     background_image = None
     if 'background_image' in request.files:
         file = request.files['background_image']
@@ -218,7 +215,7 @@ def create_page():
         file = request.files['background_music']
         if file and file.filename:
             os.makedirs('uploads/music', exist_ok=True)
-            ext = file.rsplit('.', 1)[-1].lower()
+            ext = file.filename.rsplit('.', 1)[-1].lower()
             filename = f"{slug}_{int(datetime.now().timestamp())}.{ext}"
             file.save(f"uploads/music/{filename}")
             background_music = f"/uploads/music/{filename}"
@@ -242,11 +239,11 @@ def create_page():
                 return jsonify({'success': False, 'message': 'Slug này đã tồn tại!'}), 400
             
             sql = """
-                INSERT INTO love_pages (slug, title, girl_name, love_message, template_id, 
+                INSERT INTO love_pages (slug, title, girl_name, love_message, template_id,
                                         background_image, background_music, effects)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
-            cur.execute(sql, (slug, title, girl_name, love_message, template_id, 
+            cur.execute(sql, (slug, title, girl_name, love_message, template_id,
                              background_image, background_music, effects))
             conn.commit()
         conn.close()
@@ -258,7 +255,6 @@ def create_page():
 @app.route('/api/templates')
 @login_required
 def get_templates():
-    # Đọc danh sách template từ thư mục templates_mau
     templates = []
     template_dir = 'templates_mau'
     if os.path.exists(template_dir):
@@ -272,7 +268,6 @@ def get_templates():
                     'preview': None
                 })
     
-    # Nếu chưa có template nào, trả về mặc định
     if not templates:
         templates = [
             {'id': 'default', 'name': 'Default', 'description': 'Mẫu mặc định'},
@@ -310,13 +305,9 @@ def serve_love_page(slug):
         with conn.cursor() as cur:
             cur.execute("SELECT * FROM love_pages WHERE slug = %s", (slug.lower(),))
             page_data = cur.fetchone()
-            
             if page_data:
-                # Cập nhật lượt xem
                 cur.execute("UPDATE love_pages SET views = views + 1 WHERE slug = %s", (slug.lower(),))
                 conn.commit()
-                
-                # Parse effects
                 if page_data.get('effects'):
                     page_data['effects'] = json.loads(page_data['effects'])
                 else:
@@ -356,4 +347,4 @@ def serve_subpath(subpath):
 # ==================== CHẠY APP ====================
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=port, debug=False)
