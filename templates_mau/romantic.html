@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ data['title'] }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .heart-float { animation: float 3s ease-in-out infinite; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-red-400 via-pink-500 to-purple-600 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-2xl mx-auto">
+        <div class="text-center mb-8 heart-float">
+            <div class="text-8xl mb-4">💖</div>
+            <h1 class="text-5xl font-bold text-white mb-4">{{ data['title'] }}</h1>
+            <p class="text-2xl text-white/90">Gửi <span class="font-semibold">{{ data['girl_name'] }}</span></p>
+        </div>
+        
+        <div class="bg-white/20 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/30">
+            <div class="text-6xl text-center mb-6">💌</div>
+            <p class="text-xl text-white leading-relaxed text-center italic">
+                "{{ data['love_message'] }}"
+            </p>
+            <div class="flex justify-center gap-4 mt-8">
+                <div class="text-center">
+                    <div class="text-3xl">❤️</div>
+                    <p class="text-white/80 text-sm">Yêu thương</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl">💝</div>
+                    <p class="text-white/80 text-sm">Trân trọng</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl">💗</div>
+                    <p class="text-white/80 text-sm">Mãi mãi</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-8 text-white/60 text-sm">
+            Made with love 💕
+        </div>
+    </div>
+</body>
+</html>
