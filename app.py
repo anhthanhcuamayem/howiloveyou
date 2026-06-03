@@ -19,13 +19,11 @@ ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
 if not ADMIN_PASSWORD:
     raise ValueError("❌ Thiếu biến môi trường ADMIN_PASSWORD! Hãy thêm nó trên Railway.")
 
-# Database URL - bắt buộc phải có trên Railway
-DATABASE_URL = os.environ.get("DATABASE_URL") or os.environ.get("MYSQL_URL")
-if not DATABASE_URL:
-    raise ValueError("❌ Thiếu biến môi trường DATABASE_URL hoặc MYSQL_URL! Hãy thêm database trên Railway.")
-
 # ==================== HÀM KẾT NỐI DATABASE ====================
 def get_db_connection():
+    DATABASE_URL = os.environ.get("DATABASE_URL") or os.environ.get("MYSQL_URL")
+    if not DATABASE_URL:
+        raise RuntimeError("❌ Thiếu biến môi trường DATABASE_URL hoặc MYSQL_URL! Hãy thêm database trên Railway.")
     url = urlparse(DATABASE_URL)
     
     # Xóa bỏ các tham số ?options=... trong path nếu có
