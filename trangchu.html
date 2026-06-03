@@ -267,4 +267,33 @@
         }
 
         function previewTemplate(templateId) { window.open(`/api/templates/${templateId}/preview`, '_blank'); }
-        function showSection(section) { currentSection = section; document.querySelectorAll('.section-content').
+        function showSection(section) { currentSection = section; document.querySelectorAll('.section-content').forEach(el => el.classList.add('hidden')); document.getElementById(`section-${section}`).classList.remove('hidden'); if (section === 'dashboard') loadDashboardStats(); if (section === 'pages') loadPages(); if (section === 'templates') loadTemplates(); }
+        function showCreateModal() { document.getElementById('createModal').classList.remove('hidden'); document.getElementById('createModal').style.display = 'flex'; }
+        function closeCreateModal() { document.getElementById('createModal').style.display = 'none'; }
+        function escapeHtml(str) { if (!str) return ''; const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
+        function showToast(msg, type) { const toast = document.createElement('div'); toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-xl shadow-lg z-50 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white`; toast.innerHTML = msg; document.body.appendChild(toast); setTimeout(() => toast.remove(), 3000); }
+
+        document.getElementById('createPageForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const res = await fetch('/api/create-page', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) { showToast('Tạo trang thành công!', 'success'); closeCreateModal(); loadPages(); loadDashboardStats(); }
+            else showToast(data.error || data.message, 'error');
+        });
+
+        document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const res = await fetch('/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: document.getElementById('username').value, password: document.getElementById('password').value }) });
+            const data = await res.json();
+            if (data.success) { showToast('Đăng nhập thành công!', 'success'); document.getElementById('loginContainer').classList.add('hidden'); document.getElementById('dashboardContainer').classList.remove('hidden'); showSection('dashboard'); }
+            else showToast(data.message, 'error');
+        });
+
+        document.getElementById('logoutBtn')?.addEventListener('click', async () => { await fetch('/logout', { method: 'POST' }); document.getElementById('loginContainer').classList.remove('hidden'); document.getElementById('dashboardContainer').classList.add('hidden'); });
+
+        // Auto check session
+        (async () => { try { const res = await fetch('/api/dashboard-stats'); if (res.ok) { document.getElementById('loginContainer').classList.add('hidden'); document.getElementById('dashboardContainer').classList.remove('hidden'); showSection('dashboard'); } } catch(e) {} })();
+    </script>
+</body>
+</html>
