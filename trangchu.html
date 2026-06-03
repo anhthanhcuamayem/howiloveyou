@@ -1,23 +1,23 @@
-<!-- trangchu.html -->
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
+    <title>HowILoveYou - Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
     <link rel="stylesheet" href="trangchu.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen">
-    
-    <!-- Login Form -->
+
+    <!-- Login Container -->
     <div id="loginContainer" class="min-h-screen flex items-center justify-center px-4">
         <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 w-full max-w-md shadow-2xl border border-white/20">
             <div class="text-center mb-8">
-                <i class="ri-admin-line text-6xl text-white mb-4"></i>
-                <h2 class="text-3xl font-bold text-white">Admin Login</h2>
-                <p class="text-gray-300 mt-2">Vui lòng đăng nhập để tiếp tục</p>
+                <i class="ri-heart-3-line text-6xl text-pink-400 mb-4"></i>
+                <h2 class="text-3xl font-bold text-white">HowILoveYou</h2>
+                <p class="text-gray-300 mt-2">Đăng nhập để quản lý</p>
             </div>
             <form id="loginForm">
                 <div class="mb-6">
@@ -28,41 +28,243 @@
                     <label class="block text-white mb-2">Mật khẩu</label>
                     <input type="password" id="password" class="w-full px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Nhập mật khẩu">
                 </div>
-                <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 transform hover:scale-105">Đăng nhập</button>
+                <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300">Đăng nhập</button>
             </form>
         </div>
     </div>
 
-    <!-- Dashboard -->
-    <div id="dashboardContainer" class="hidden min-h-screen">
+    <!-- Dashboard Container -->
+    <div id="dashboardContainer" class="hidden">
+        
         <!-- Header -->
         <div class="bg-white/10 backdrop-blur-lg border-b border-white/20 sticky top-0 z-50">
             <div class="container mx-auto px-6 py-4">
-                <div class="flex justify-between items-center">
+                <div class="flex justify-between items-center flex-wrap gap-4">
                     <div class="flex items-center gap-3">
-                        <i class="ri-dashboard-line text-3xl text-white"></i>
-                        <h1 class="text-2xl font-bold text-white">Admin Dashboard</h1>
+                        <i class="ri-heart-3-line text-3xl text-pink-400"></i>
+                        <h1 class="text-2xl font-bold text-white">HowILoveYou</h1>
                     </div>
-                    <button id="logoutBtn" class="bg-red-500/20 hover:bg-red-500 text-red-300 hover:text-white px-5 py-2 rounded-xl transition-all duration-300 flex items-center gap-2">
-                        <i class="ri-logout-box-line"></i>
-                        Đăng xuất
-                    </button>
+                    <div class="flex gap-3 flex-wrap">
+                        <button onclick="showSection('dashboard')" class="nav-btn px-4 py-2 rounded-xl text-white hover:bg-white/20 transition-all">📊 Tổng quan</button>
+                        <button onclick="showSection('pages')" class="nav-btn px-4 py-2 rounded-xl text-white hover:bg-white/20 transition-all">📄 Quản lý trang</button>
+                        <button onclick="showCreateModal()" class="nav-btn px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:shadow-lg transition-all">✨ Tạo trang mới</button>
+                        <button onclick="showSection('templates')" class="nav-btn px-4 py-2 rounded-xl text-white hover:bg-white/20 transition-all">🎨 Templates</button>
+                        <button id="logoutBtn" class="bg-red-500/20 hover:bg-red-500 text-red-300 hover:text-white px-5 py-2 rounded-xl transition-all flex items-center gap-2">
+                            <i class="ri-logout-box-line"></i> Đăng xuất
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Main Content -->
         <div class="container mx-auto px-6 py-8">
-            <div class="mb-8">
-                <h2 class="text-3xl font-bold text-white mb-2">Chào mừng Admin!</h2>
-                <p class="text-gray-300">Quản lý các công cụ và trang của bạn</p>
+            
+            <!-- Section: Dashboard -->
+            <div id="section-dashboard" class="section-content">
+                <h2 class="text-3xl font-bold text-white mb-6">📊 Tổng quan</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-300 text-sm">Tổng số trang</p>
+                                <p id="totalPages" class="text-4xl font-bold text-white">0</p>
+                            </div>
+                            <i class="ri-file-copy-line text-5xl text-purple-400"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-300 text-sm">Tổng lượt xem</p>
+                                <p id="totalViews" class="text-4xl font-bold text-white">0</p>
+                            </div>
+                            <i class="ri-eye-line text-5xl text-blue-400"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                        <h3 class="text-xl font-bold text-white mb-4">🔥 Top 5 trang xem nhiều nhất</h3>
+                        <div id="topPagesList" class="space-y-3"></div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                        <h3 class="text-xl font-bold text-white mb-4">📈 Thống kê theo tháng</h3>
+                        <canvas id="monthlyChart" height="200"></canvas>
+                    </div>
+                </div>
             </div>
-            <div id="toolsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Cards sẽ được render bằng JavaScript -->
+
+            <!-- Section: Quản lý Trang -->
+            <div id="section-pages" class="section-content hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-white">📄 Quản lý trang</h2>
+                    <button onclick="showCreateModal()" class="bg-pink-600 hover:bg-pink-700 text-white px-5 py-2 rounded-xl transition-all">+ Tạo trang mới</button>
+                </div>
+                
+                <div class="bg-white/10 backdrop-blur-lg rounded-2xl overflow-hidden border border-white/20">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-white">
+                            <thead class="bg-white/20">
+                                <tr><th class="px-4 py-3 text-left">ID</th><th class="px-4 py-3 text-left">Tiêu đề</th><th class="px-4 py-3 text-left">Người nhận</th><th class="px-4 py-3 text-left">Slug</th><th class="px-4 py-3 text-left">Template</th><th class="px-4 py-3 text-left">Lượt xem</th><th class="px-4 py-3 text-left">Link</th><th class="px-4 py-3 text-left">Thao tác</th></tr>
+                            </thead>
+                            <tbody id="pagesTableBody"><tr><td colspan="8" class="text-center py-8 text-gray-400">Đang tải...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Templates -->
+            <div id="section-templates" class="section-content hidden">
+                <h2 class="text-3xl font-bold text-white mb-6">🎨 Thư viện Template</h2>
+                <div id="templatesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
             </div>
         </div>
     </div>
 
+    <!-- Modal Tạo Trang -->
+    <div id="createModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 border border-white/20">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-white">✨ Tạo trang tỏ tình mới</h2>
+                <button onclick="closeCreateModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            <form id="createPageForm" enctype="multipart/form-data">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-white mb-1">Slug (đường dẫn) *</label>
+                        <input type="text" name="slug" required class="w-full px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white" placeholder="vi-du-tinh-yeu">
+                        <p class="text-gray-400 text-sm mt-1">Kết quả: yoursite.com/p/vi-du-tinh-yeu</p>
+                    </div>
+                    <div>
+                        <label class="block text-white mb-1">Tiêu đề trang *</label>
+                        <input type="text" name="title" required class="w-full px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white" placeholder="Gửi người anh thương...">
+                    </div>
+                    <div>
+                        <label class="block text-white mb-1">Tên người nhận *</label>
+                        <input type="text" name="girl_name" required class="w-full px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white" placeholder="Tên em">
+                    </div>
+                    <div>
+                        <label class="block text-white mb-1">Lời tỏ tình *</label>
+                        <textarea name="love_message" rows="4" required class="w-full px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white" placeholder="Anh muốn nói rằng..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-white mb-1">Chọn template</label>
+                        <select name="template_id" class="w-full px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white">
+                            <option value="default">Default - Mặc định</option>
+                            <option value="yesno">Yes/No - Đồng ý/Từ chối</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-white mb-1">Ảnh nền (tùy chọn)</label>
+                        <input type="file" name="background_image" accept="image/*" class="w-full text-white">
+                    </div>
+                    <div>
+                        <label class="block text-white mb-1">Nhạc nền (URL hoặc upload)</label>
+                        <input type="text" name="music_url" class="w-full px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white mb-2" placeholder="https://...">
+                        <input type="file" name="background_music" accept="audio/*" class="w-full text-white">
+                    </div>
+                    <div class="border-t border-white/20 pt-4">
+                        <h3 class="text-white font-semibold mb-2">🎉 Hiệu ứng đặc biệt</h3>
+                        <label class="flex items-center gap-2 text-white"><input type="checkbox" name="heart_rain" value="true"> 💖 Mưa tim</label>
+                        <label class="flex items-center gap-2 text-white mt-2"><input type="checkbox" name="confetti" value="true"> 🎊 Bắn pháo giấy</label>
+                        <div class="mt-2">
+                            <label class="block text-white mb-1">⏰ Đếm ngược đến ngày</label>
+                            <input type="date" name="countdown_date" class="px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white">
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold">Tạo trang</button>
+                    <button type="button" onclick="closeCreateModal()" class="flex-1 bg-white/10 text-white py-3 rounded-xl">Hủy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="trangchu.js"></script>
-</body>
-</html>
+    <script>
+        let monthlyChart = null;
+        let currentSection = 'dashboard';
+
+        async function loadDashboardStats() {
+            try {
+                const res = await fetch('/api/dashboard-stats');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('totalPages').textContent = data.total_pages;
+                    document.getElementById('totalViews').textContent = data.total_views;
+                    
+                    const topList = document.getElementById('topPagesList');
+                    if (data.top_pages.length === 0) {
+                        topList.innerHTML = '<p class="text-gray-400">Chưa có dữ liệu</p>';
+                    } else {
+                        topList.innerHTML = data.top_pages.map((page, i) => `
+                            <div class="flex justify-between items-center p-3 bg-white/5 rounded-xl">
+                                <div class="flex items-center gap-3"><span class="text-2xl">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '📄'}</span><div><p class="font-semibold">${escapeHtml(page.title)}</p><p class="text-sm text-gray-400">/${page.slug}</p></div></div>
+                                <span class="text-pink-400 font-bold">${page.views} lượt</span>
+                            </div>
+                        `).join('');
+                    }
+                    
+                    if (monthlyChart) monthlyChart.destroy();
+                    const ctx = document.getElementById('monthlyChart').getContext('2d');
+                    monthlyChart = new Chart(ctx, {
+                        type: 'line',
+                        data: { labels: data.monthly_stats.map(s => s.month), datasets: [{ label: 'Số trang tạo mới', data: data.monthly_stats.map(s => s.count), borderColor: '#f472b6', backgroundColor: 'rgba(244,114,182,0.1)', tension: 0.4, fill: true }] },
+                        options: { responsive: true, plugins: { legend: { labels: { color: 'white' } } } }
+                    });
+                }
+            } catch (error) { console.error(error); }
+        }
+
+        async function loadPages() {
+            try {
+                const res = await fetch('/api/pages');
+                const data = await res.json();
+                const tbody = document.getElementById('pagesTableBody');
+                if (data.success && data.pages.length > 0) {
+                    tbody.innerHTML = data.pages.map(page => `<tr class="border-b border-white/10 hover:bg-white/5">
+                        <td class="px-4 py-3">${page.id}</td><td class="px-4 py-3 font-semibold">${escapeHtml(page.title)}</td>
+                        <td class="px-4 py-3">${escapeHtml(page.girl_name)}</td><td class="px-4 py-3"><code>${page.slug}</code></td>
+                        <td class="px-4 py-3">${page.template_id}</td><td class="px-4 py-3">${page.views}</td>
+                        <td class="px-4 py-3"><a href="${page.public_url}" target="_blank" class="text-pink-400 hover:underline">Xem</a></td>
+                        <td class="px-4 py-3"><button onclick="deletePage(${page.id})" class="text-red-400 hover:text-red-300"><i class="ri-delete-bin-line"></i></button></td>
+                    </tr>`).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-gray-400">Chưa có trang nào</td></tr>';
+                }
+            } catch (error) { console.error(error); }
+        }
+
+        async function deletePage(id) {
+            if (confirm('Xóa trang này?')) {
+                const res = await fetch(`/api/pages/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) { showToast('Đã xóa', 'success'); loadPages(); loadDashboardStats(); }
+                else showToast(data.error, 'error');
+            }
+        }
+
+        async function loadTemplates() {
+            try {
+                const res = await fetch('/api/templates');
+                const data = await res.json();
+                const container = document.getElementById('templatesList');
+                if (data.success && data.templates.length > 0) {
+                    container.innerHTML = data.templates.map(tpl => `
+                        <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 text-center">
+                            <div class="text-5xl mb-3">🎨</div>
+                            <h3 class="text-xl font-bold text-white mb-2">${escapeHtml(tpl.name)}</h3>
+                            <p class="text-gray-300 text-sm mb-4">${escapeHtml(tpl.description)}</p>
+                            <button onclick="previewTemplate('${tpl.id}')" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-xl">Xem trước</button>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) { console.error(error); }
+        }
+
+        function previewTemplate(templateId) { window.open(`/api/templates/${templateId}/preview`, '_blank'); }
+        function showSection(section) { currentSection = section; document.querySelectorAll('.section-content').
