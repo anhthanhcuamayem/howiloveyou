@@ -72,6 +72,30 @@
       transition: color 0.2s;
     }
     .toast-close:hover { color: #fff; }
+
+    /* Modal Animation */
+    @keyframes modalPopIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+    
+    .modal-show {
+      animation: modalPopIn 0.3s ease forwards !important;
+    }
+    
+    .delete-page-btn {
+      transition: all 0.2s ease;
+    }
+    
+    .delete-page-btn:hover {
+      transform: scale(1.1);
+    }
   </style>
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen">
@@ -256,6 +280,31 @@
     </div>
   </div>
 
+  <!-- Modal Xác Nhận Xóa (Đẹp) -->
+  <div id="deleteConfirmModal" class="fixed inset-0 bg-black/70 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl max-w-md w-full p-6 border border-red-500/30 shadow-2xl" id="deleteModalContent">
+      <div class="text-center">
+        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-red-500/20 flex items-center justify-center">
+          <i class="ri-delete-bin-7-line text-5xl text-red-400"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-2">Xác nhận xóa</h3>
+        <p class="text-gray-300 mb-6">
+          Bạn có chắc chắn muốn xóa trang <br>
+          <span id="deletePageTitle" class="font-semibold text-pink-400"></span>?
+        </p>
+        <p class="text-sm text-gray-400 mb-6">Hành động này không thể hoàn tác!</p>
+        <div class="flex gap-3">
+          <button id="confirmDeleteBtn" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2">
+            <i class="ri-delete-bin-line"></i> Xóa ngay
+          </button>
+          <button id="cancelDeleteBtn" class="flex-1 bg-white/10 hover:bg-white/20 text-white py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2">
+            <i class="ri-close-line"></i> Hủy
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     // ==================== TOAST SYSTEM ====================
     let toastId = 0;
@@ -264,7 +313,6 @@
       const container = document.getElementById('toast-container');
       if (!container) return;
 
-      const id = toastId++;
       const titles = { success: 'Thành công!', error: 'Lỗi!', warning: 'Cảnh báo!', info: 'Thông báo' };
       const finalTitle = title || titles[type] || 'Thông báo';
       const icons = { success: '✓', error: '✗', warning: '⚠', info: 'ℹ' };
@@ -294,6 +342,49 @@
     // ==================== BIẾN TOÀN CỤC ====================
     let monthlyChart = null;
     let currentSection = 'dashboard';
+    let pendingDeleteId = null;
+
+    // ==================== MODAL XÓA ====================
+    function showDeleteModal(pageId, pageTitle) {
+      pendingDeleteId = pageId;
+      const modal = document.getElementById('deleteConfirmModal');
+      const titleSpan = document.getElementById('deletePageTitle');
+      titleSpan.textContent = pageTitle;
+      modal.style.display = 'flex';
+      modal.classList.remove('hidden');
+    }
+
+    function closeDeleteModal() {
+      const modal = document.getElementById('deleteConfirmModal');
+      modal.style.display = 'none';
+      modal.classList.add('hidden');
+      pendingDeleteId = null;
+    }
+
+    async function confirmDelete() {
+      if (!pendingDeleteId) return;
+      try {
+        const res = await fetch(`/api/pages/${pendingDeleteId}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.success) { 
+          showToast('Đã xóa trang thành công', 'success'); 
+          loadPages(); 
+          loadDashboardStats(); 
+        } else { 
+          showToast(data.error || 'Không thể xóa trang', 'error'); 
+        }
+      } catch (error) { 
+        showToast('Lỗi khi xóa trang', 'error'); 
+      }
+      closeDeleteModal();
+    }
+
+    // Gắn sự kiện modal
+    document.getElementById('confirmDeleteBtn')?.addEventListener('click', confirmDelete);
+    document.getElementById('cancelDeleteBtn')?.addEventListener('click', closeDeleteModal);
+    document.getElementById('deleteConfirmModal')?.addEventListener('click', (e) => {
+      if (e.target === document.getElementById('deleteConfirmModal')) closeDeleteModal();
+    });
 
     // ==================== CHỨC NĂNG CHÍNH ====================
     async function loadDashboardStats() {
@@ -325,19 +416,13 @@
       } catch (error) { console.error(error); showToast('Không thể tải thống kê', 'error'); }
     }
 
-    // Load danh sách công cụ từ file cactrang.txt
     async function loadTools() {
       try {
         const response = await fetch('/api/cactrang');
         const tools = await response.json();
         const toolsGrid = document.getElementById('toolsGrid');
         if (tools.length === 0) {
-          toolsGrid.innerHTML = `
-            <div class="col-span-full text-center py-12">
-              <i class="ri-tools-line text-6xl text-gray-400 mb-4"></i>
-              <p class="text-gray-400 text-lg">Chưa có công cụ nào. Thêm vào file cactrang.txt nhé!</p>
-            </div>
-          `;
+          toolsGrid.innerHTML = `<div class="col-span-full text-center py-12"><i class="ri-tools-line text-6xl text-gray-400 mb-4"></i><p class="text-gray-400 text-lg">Chưa có công cụ nào. Thêm vào file cactrang.txt nhé!</p></div>`;
           return;
         }
         toolsGrid.innerHTML = tools.map((tool, index) => `
@@ -350,10 +435,7 @@
             <p class="text-gray-300 text-sm">Đường dẫn: /${tool.path}</p>
           </div>
         `).join('');
-      } catch (error) {
-        console.error('Lỗi tải công cụ:', error);
-        showToast('Không thể tải danh sách công cụ', 'error');
-      }
+      } catch (error) { console.error(error); showToast('Không thể tải danh sách công cụ', 'error'); }
     }
 
     async function loadPages() {
@@ -362,31 +444,20 @@
         const data = await res.json();
         const tbody = document.getElementById('pagesTableBody');
         if (data.success && data.pages.length > 0) {
-          tbody.innerHTML = data.pages.map(page => `<tr class="border-b border-white/10 hover:bg-white/5">
-            <td class="px-4 py-3">${page.id}</td><td class="px-4 py-3 font-semibold">${escapeHtml(page.title)}</td>
-            <td class="px-4 py-3">${escapeHtml(page.girl_name)}</td><td class="px-4 py-3"><code>${page.slug}</code></td>
-            <td class="px-4 py-3">${page.template_id}</td><td class="px-4 py-3">${page.views}</td>
-            <td class="px-4 py-3"><a href="${page.public_url}" target="_blank" class="text-pink-400 hover:underline">Xem</a></td>
-            <td class="px-4 py-3"><button onclick="deletePage(${page.id})" class="text-red-400 hover:text-red-300"><i class="ri-delete-bin-line"></i></button></td>
+          tbody.innerHTML = data.pages.map(page => `<tr class="border-b border-white/10 hover:bg-white/5 transition-colors">
+            <td class="px-4 py-3">${page.id}</td>
+            <td class="px-4 py-3 font-semibold">${escapeHtml(page.title)}</td>
+            <td class="px-4 py-3">${escapeHtml(page.girl_name)}</td>
+            <td class="px-4 py-3"><code class="bg-white/10 px-2 py-1 rounded text-sm">${page.slug}</code></td>
+            <td class="px-4 py-3"><span class="bg-purple-500/20 text-purple-300 px-2 py-1 rounded text-xs">${page.template_id}</span></td>
+            <td class="px-4 py-3"><span class="flex items-center gap-1"><i class="ri-eye-line text-gray-400"></i>${page.views}</span></td>
+            <td class="px-4 py-3"><a href="${page.public_url}" target="_blank" class="text-pink-400 hover:text-pink-300 transition-colors flex items-center gap-1"><i class="ri-external-link-line"></i> Xem</a></td>
+            <td class="px-4 py-3"><button onclick="showDeleteModal(${page.id}, '${escapeHtml(page.title).replace(/'/g, "\\'")}')" class="delete-page-btn text-red-400 hover:text-red-300 transition-all"><i class="ri-delete-bin-line text-xl"></i></button></td>
           </tr>`).join('');
         } else {
-          tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-gray-400">Chưa có trang nào</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-gray-400"><i class="ri-inbox-line text-4xl mb-2 block"></i>Chưa có trang nào</td></tr>';
         }
       } catch (error) { console.error(error); showToast('Không thể tải danh sách trang', 'error'); }
-    }
-
-    async function deletePage(id) {
-      if (confirm('Xóa trang này?')) {
-        try {
-          const res = await fetch(`/api/pages/${id}`, { method: 'DELETE' });
-          const data = await res.json();
-          if (data.success) { 
-            showToast('Đã xóa trang thành công', 'success'); 
-            loadPages(); 
-            loadDashboardStats(); 
-          } else showToast(data.error, 'error');
-        } catch (error) { showToast('Lỗi khi xóa trang', 'error'); }
-      }
     }
 
     async function loadTemplates() {
