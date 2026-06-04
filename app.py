@@ -175,6 +175,24 @@ def update_page(page_id):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+# ==================== API: LẤY DANH SÁCH NHẠC TỪ THƯ MỤC SOUND_MAU ====================
+@app.route('/api/sounds')
+@login_required
+def get_sounds():
+    try:
+        sound_dir = 'sound_mau'
+        sounds = []
+        if os.path.exists(sound_dir):
+            for filename in os.listdir(sound_dir):
+                if filename.lower().endswith(('.mp3', '.wav', '.ogg', '.m4a')):
+                    sounds.append({
+                        'name': filename,
+                        'path': f'/sound_mau/{filename}'
+                    })
+        return jsonify({'success': True, 'sounds': sounds})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 # ==================== API: TẠO TRANG MỚI (HỖ TRỢ ALBUM ẢNH) ====================
 @app.route('/api/create-page', methods=['POST'])
 @login_required
@@ -197,9 +215,9 @@ def create_page():
             file.save(f"uploads/backgrounds/{filename}")
             background_image = f"/uploads/backgrounds/{filename}"
 
-    # Xử lý nhạc nền
+    # Xử lý nhạc nền (ưu tiên URL từ input music_url, sau đó mới đến file upload)
     background_music = data.get('music_url', '').strip()
-    if 'background_music' in request.files:
+    if not background_music and 'background_music' in request.files:
         file = request.files['background_music']
         if file and file.filename:
             os.makedirs('uploads/music', exist_ok=True)
@@ -208,7 +226,7 @@ def create_page():
             file.save(f"uploads/music/{filename}")
             background_music = f"/uploads/music/{filename}"
 
-    # ========== XỬ LÝ ALBUM ẢNH (tối đa 10 ảnh) ==========
+    # Xử lý album ảnh (tối đa 10 ảnh)
     image_list = []
     if 'album_images' in request.files:
         files = request.files.getlist('album_images')
@@ -283,7 +301,7 @@ def preview_template(template_id):
         'title': 'Xem trước template',
         'girl_name': 'Người yêu',
         'love_message': 'Đây là bản xem trước của template này',
-        'images': []   # preview không cần ảnh
+        'images': []
     })
 
 # ==================== CẬP NHẬT LƯỢT XEM ====================
@@ -310,7 +328,6 @@ def serve_love_page(slug):
             if page_data:
                 cur.execute("UPDATE love_pages SET views = views + 1 WHERE slug = %s", (slug.lower(),))
                 conn.commit()
-                # Parse JSON fields
                 if page_data.get('effects'):
                     page_data['effects'] = json.loads(page_data['effects'])
                 else:
@@ -330,6 +347,11 @@ def serve_love_page(slug):
 @app.route('/uploads/<path:filename>')
 def serve_upload(filename):
     return send_from_directory('uploads', filename)
+
+# ==================== ROUTE CHO THƯ MỤC SOUND_MAU ====================
+@app.route('/sound_mau/<path:filename>')
+def serve_sound(filename):
+    return send_from_directory('sound_mau', filename)
 
 # ==================== ROUTE PHÂN PHỐI FILE TĨNH ====================
 @app.route('/<path:subpath>')
