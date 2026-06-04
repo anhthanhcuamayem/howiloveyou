@@ -53,42 +53,14 @@
       flex-shrink: 0;
     }
 
-    .toast-icon.success {
-      background: #22c55e;
-      color: white;
-    }
+    .toast-icon.success { background: #22c55e; color: white; }
+    .toast-icon.error { background: #ef4444; color: white; }
+    .toast-icon.warning { background: #f59e0b; color: white; }
+    .toast-icon.info { background: #3b82f6; color: white; }
 
-    .toast-icon.error {
-      background: #ef4444;
-      color: white;
-    }
-
-    .toast-icon.warning {
-      background: #f59e0b;
-      color: white;
-    }
-
-    .toast-icon.info {
-      background: #3b82f6;
-      color: white;
-    }
-
-    .toast-content {
-      flex: 1;
-    }
-
-    .toast-content h4 {
-      margin: 0;
-      font-size: 16px;
-      font-weight: 600;
-      color: #fff;
-    }
-
-    .toast-content p {
-      margin: 4px 0 0 0;
-      font-size: 13px;
-      color: #a1a1aa;
-    }
+    .toast-content { flex: 1; }
+    .toast-content h4 { margin: 0; font-size: 16px; font-weight: 600; color: #fff; }
+    .toast-content p { margin: 4px 0 0 0; font-size: 13px; color: #a1a1aa; }
 
     .toast-close {
       background: none;
@@ -99,10 +71,7 @@
       padding: 0 4px;
       transition: color 0.2s;
     }
-
-    .toast-close:hover {
-      color: #fff;
-    }
+    .toast-close:hover { color: #fff; }
   </style>
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen">
@@ -144,6 +113,7 @@
           </div>
           <div class="flex gap-3 flex-wrap">
             <button onclick="showSection('dashboard')" class="nav-btn px-4 py-2 rounded-xl text-white hover:bg-white/20 transition-all">📊 Tổng quan</button>
+            <button onclick="showSection('tools')" class="nav-btn px-4 py-2 rounded-xl text-white hover:bg-white/20 transition-all">🔧 Công cụ</button>
             <button onclick="showSection('pages')" class="nav-btn px-4 py-2 rounded-xl text-white hover:bg-white/20 transition-all">📄 Quản lý trang</button>
             <button onclick="showCreateModal()" class="nav-btn px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:shadow-lg transition-all">✨ Tạo trang mới</button>
             <button onclick="showSection('templates')" class="nav-btn px-4 py-2 rounded-xl text-white hover:bg-white/20 transition-all">🎨 Templates</button>
@@ -190,6 +160,12 @@
             <canvas id="monthlyChart" height="200"></canvas>
           </div>
         </div>
+      </div>
+
+      <!-- Section: Công cụ (Tools) -->
+      <div id="section-tools" class="section-content hidden">
+        <h2 class="text-3xl font-bold text-white mb-6">🔧 Danh sách công cụ</h2>
+        <div id="toolsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
       </div>
 
       <!-- Section: Quản lý Trang -->
@@ -248,6 +224,8 @@
             <label class="block text-white mb-1">Chọn template</label>
             <select name="template_id" class="w-full px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white">
               <option value="default">Default - Mặc định</option>
+              <option value="romantic">Romantic - Lãng mạn</option>
+              <option value="minimal">Minimal - Tối giản</option>
               <option value="yesno">Yes/No - Đồng ý/Từ chối</option>
             </select>
           </div>
@@ -278,9 +256,8 @@
     </div>
   </div>
 
-  <script src="trangchu.js"></script>
   <script>
-    // Toast System
+    // ==================== TOAST SYSTEM ====================
     let toastId = 0;
 
     function showToast(message, type = 'success', title = null) {
@@ -288,24 +265,14 @@
       if (!container) return;
 
       const id = toastId++;
-      const titles = {
-        success: 'Thành công!',
-        error: 'Lỗi!',
-        warning: 'Cảnh báo!',
-        info: 'Thông báo'
-      };
-
+      const titles = { success: 'Thành công!', error: 'Lỗi!', warning: 'Cảnh báo!', info: 'Thông báo' };
       const finalTitle = title || titles[type] || 'Thông báo';
-      const icons = {
-        success: '✓',
-        error: '✗',
-        warning: '⚠',
-        info: 'ℹ'
-      };
+      const icons = { success: '✓', error: '✗', warning: '⚠', info: 'ℹ' };
+      const borderColors = { success: '#22c55e', error: '#ef4444', warning: '#f59e0b', info: '#3b82f6' };
 
       const toast = document.createElement('div');
-      toast.className = `toast-item`;
-      toast.style.borderLeftColor = type === 'success' ? '#22c55e' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#3b82f6';
+      toast.className = 'toast-item';
+      toast.style.borderLeftColor = borderColors[type];
       toast.innerHTML = `
         <div class="toast-icon ${type}">${icons[type] || '✓'}</div>
         <div class="toast-content">
@@ -314,13 +281,8 @@
         </div>
         <button class="toast-close" onclick="this.closest('.toast-item').remove()">×</button>
       `;
-
       container.appendChild(toast);
-      
-      // Animation
       setTimeout(() => toast.classList.add('show'), 10);
-
-      // Auto remove after 4 seconds
       setTimeout(() => {
         if (toast && toast.parentNode) {
           toast.classList.remove('show');
@@ -329,9 +291,11 @@
       }, 4000);
     }
 
+    // ==================== BIẾN TOÀN CỤC ====================
     let monthlyChart = null;
     let currentSection = 'dashboard';
 
+    // ==================== CHỨC NĂNG CHÍNH ====================
     async function loadDashboardStats() {
       try {
         const res = await fetch('/api/dashboard-stats');
@@ -359,6 +323,37 @@
           });
         }
       } catch (error) { console.error(error); showToast('Không thể tải thống kê', 'error'); }
+    }
+
+    // Load danh sách công cụ từ file cactrang.txt
+    async function loadTools() {
+      try {
+        const response = await fetch('/api/cactrang');
+        const tools = await response.json();
+        const toolsGrid = document.getElementById('toolsGrid');
+        if (tools.length === 0) {
+          toolsGrid.innerHTML = `
+            <div class="col-span-full text-center py-12">
+              <i class="ri-tools-line text-6xl text-gray-400 mb-4"></i>
+              <p class="text-gray-400 text-lg">Chưa có công cụ nào. Thêm vào file cactrang.txt nhé!</p>
+            </div>
+          `;
+          return;
+        }
+        toolsGrid.innerHTML = tools.map((tool, index) => `
+          <div class="card-animate bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 cursor-pointer group" style="animation-delay: ${index * 0.1}s" onclick="window.location.href='/${tool.path}'">
+            <div class="flex items-start justify-between mb-4">
+              <i class="ri-tools-line text-4xl text-purple-400 group-hover:rotate-12 transition-transform duration-300"></i>
+              <i class="ri-arrow-right-up-line text-2xl text-gray-400 group-hover:text-white group-hover:translate-x-1 group-hover:-translate-y-1 transition-all"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">${escapeHtml(tool.name)}</h3>
+            <p class="text-gray-300 text-sm">Đường dẫn: /${tool.path}</p>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error('Lỗi tải công cụ:', error);
+        showToast('Không thể tải danh sách công cụ', 'error');
+      }
     }
 
     async function loadPages() {
@@ -390,9 +385,7 @@
             loadPages(); 
             loadDashboardStats(); 
           } else showToast(data.error, 'error');
-        } catch (error) {
-          showToast('Lỗi khi xóa trang', 'error');
-        }
+        } catch (error) { showToast('Lỗi khi xóa trang', 'error'); }
       }
     }
 
@@ -421,6 +414,7 @@
       document.querySelectorAll('.section-content').forEach(el => el.classList.add('hidden'));
       document.getElementById(`section-${section}`).classList.remove('hidden');
       if (section === 'dashboard') loadDashboardStats(); 
+      if (section === 'tools') loadTools();
       if (section === 'pages') loadPages(); 
       if (section === 'templates') loadTemplates();
     }
@@ -436,6 +430,7 @@
 
     function escapeHtml(str) { if (!str) return ''; const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
 
+    // ==================== XỬ LÝ FORM ====================
     document.getElementById('createPageForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
@@ -449,9 +444,7 @@
           loadDashboardStats(); 
           e.target.reset();
         } else showToast(data.error || data.message, 'error');
-      } catch (error) {
-        showToast('Lỗi khi tạo trang', 'error');
-      }
+      } catch (error) { showToast('Lỗi khi tạo trang', 'error'); }
     });
 
     document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
@@ -465,9 +458,7 @@
           document.getElementById('dashboardContainer').classList.remove('hidden');
           showSection('dashboard'); 
         } else showToast(data.message, 'error');
-      } catch (error) {
-        showToast('Lỗi kết nối đến server', 'error');
-      }
+      } catch (error) { showToast('Lỗi kết nối đến server', 'error'); }
     });
 
     document.getElementById('logoutBtn')?.addEventListener('click', async () => { 
@@ -477,7 +468,7 @@
       document.getElementById('dashboardContainer').classList.add('hidden');
     });
 
-    // Auto check session
+    // ==================== KIỂM TRA SESSION ====================
     (async () => { 
       try { 
         const res = await fetch('/api/dashboard-stats'); 
