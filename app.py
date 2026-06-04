@@ -9,17 +9,15 @@ from datetime import datetime
 app = Flask(__name__, template_folder='.', static_folder='.')
 
 # ==================== LẤY CẤU HÌNH TỪ ENVIRONMENT VARIABLES ====================
-# Bắt buộc phải có FLASK_SECRET_KEY trên Railway
 app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 if not app.secret_key:
     raise ValueError("❌ Thiếu biến môi trường FLASK_SECRET_KEY! Hãy thêm nó trên Railway.")
 
-ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")  # Có thể tùy chỉnh
+ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
 if not ADMIN_PASSWORD:
     raise ValueError("❌ Thiếu biến môi trường ADMIN_PASSWORD! Hãy thêm nó trên Railway.")
 
-# Database URL - bắt buộc phải có trên Railway
 DATABASE_URL = os.environ.get("DATABASE_URL") or os.environ.get("MYSQL_URL")
 if not DATABASE_URL:
     raise ValueError("❌ Thiếu biến môi trường DATABASE_URL hoặc MYSQL_URL! Hãy thêm database trên Railway.")
@@ -27,10 +25,7 @@ if not DATABASE_URL:
 # ==================== HÀM KẾT NỐI DATABASE ====================
 def get_db_connection():
     url = urlparse(DATABASE_URL)
-    
-    # Xóa bỏ các tham số ?options=... trong path nếu có
     database = url.path[1:].split('?')[0]
-    
     return pymysql.connect(
         host=url.hostname,
         user=url.username,
@@ -100,18 +95,15 @@ def dashboard_stats():
         with conn.cursor() as cur:
             cur.execute("SELECT COUNT(*) as total FROM love_pages")
             total_pages = cur.fetchone()['total']
-            
             cur.execute("SELECT COALESCE(SUM(views), 0) as total_views FROM love_pages")
             total_views = cur.fetchone()['total_views']
-            
             cur.execute("""
-                SELECT title, slug, views 
-                FROM love_pages 
-                ORDER BY views DESC 
+                SELECT title, slug, views
+                FROM love_pages
+                ORDER BY views DESC
                 LIMIT 5
             """)
             top_pages = cur.fetchall()
-            
             cur.execute("""
                 SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count
                 FROM love_pages
@@ -121,7 +113,6 @@ def dashboard_stats():
             """)
             monthly_stats = cur.fetchall()
         conn.close()
-        
         return jsonify({
             'success': True,
             'total_pages': total_pages,
@@ -141,16 +132,14 @@ def get_pages():
         with conn.cursor() as cur:
             cur.execute("""
                 SELECT id, slug, title, girl_name, love_message, template_id, views, created_at
-                FROM love_pages 
+                FROM love_pages
                 ORDER BY id DESC
             """)
             pages = cur.fetchall()
         conn.close()
-        
         for page in pages:
             page['created_at'] = page['created_at'].strftime('%d/%m/%Y %H:%M') if page['created_at'] else ''
             page['public_url'] = f"/p/{page['slug']}"
-            
         return jsonify({'success': True, 'pages': pages})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -176,7 +165,7 @@ def update_page(page_id):
         conn = get_db_connection()
         with conn.cursor() as cur:
             cur.execute("""
-                UPDATE love_pages 
+                UPDATE love_pages
                 SET title = %s, girl_name = %s, love_message = %s
                 WHERE id = %s
             """, (data.get('title'), data.get('girl_name'), data.get('love_message'), page_id))
@@ -186,19 +175,18 @@ def update_page(page_id):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-# ==================== API: TẠO TRANG MỚI ====================
+# ==================== API: TẠO TRANG MỚI (HỖ TRỢ ALBUM ẢNH) ====================
 @app.route('/api/create-page', methods=['POST'])
 @login_required
 def create_page():
     data = request.form if request.form else request.get_json() or {}
-    
     slug = data.get('slug', '').strip().lower()
     title = data.get('title', '').strip()
     girl_name = data.get('girl_name', '').strip()
     love_message = data.get('love_message', '').strip()
     template_id = data.get('template_id', 'default').strip()
-    
-    # Xử lý upload ảnh
+
+    # Xử lý ảnh nền (1 ảnh chính)
     background_image = None
     if 'background_image' in request.files:
         file = request.files['background_image']
@@ -208,8 +196,8 @@ def create_page():
             filename = f"{slug}_{int(datetime.now().timestamp())}.{ext}"
             file.save(f"uploads/backgrounds/{filename}")
             background_image = f"/uploads/backgrounds/{filename}"
-    
-    # Xử lý upload nhạc
+
+    # Xử lý nhạc nền
     background_music = data.get('music_url', '').strip()
     if 'background_music' in request.files:
         file = request.files['background_music']
@@ -219,32 +207,47 @@ def create_page():
             filename = f"{slug}_{int(datetime.now().timestamp())}.{ext}"
             file.save(f"uploads/music/{filename}")
             background_music = f"/uploads/music/{filename}"
-    
+
+    # ========== XỬ LÝ ALBUM ẢNH (tối đa 10 ảnh) ==========
+    image_list = []
+    if 'album_images' in request.files:
+        files = request.files.getlist('album_images')
+        os.makedirs('uploads/albums', exist_ok=True)
+        for idx, file in enumerate(files):
+            if idx >= 10:
+                break
+            if file and file.filename:
+                ext = file.filename.rsplit('.', 1)[-1].lower()
+                filename = f"{slug}_album_{idx}_{int(datetime.now().timestamp())}.{ext}"
+                file.save(f"uploads/albums/{filename}")
+                image_list.append(f"/uploads/albums/{filename}")
+    images_json = json.dumps(image_list) if image_list else None
+
     # Hiệu ứng
     effects = json.dumps({
         'heart_rain': data.get('heart_rain') == 'true',
         'confetti': data.get('confetti') == 'true',
         'countdown': data.get('countdown_date') or None
     })
-    
+
     if not slug or not title or not girl_name or not love_message:
         return jsonify({'success': False, 'message': 'Vui lòng điền đầy đủ thông tin'}), 400
-    
+
     try:
         conn = get_db_connection()
         with conn.cursor() as cur:
-            # Kiểm tra slug
             cur.execute("SELECT id FROM love_pages WHERE slug = %s", (slug,))
             if cur.fetchone():
                 return jsonify({'success': False, 'message': 'Slug này đã tồn tại!'}), 400
-            
+
             sql = """
-                INSERT INTO love_pages (slug, title, girl_name, love_message, template_id,
-                                        background_image, background_music, effects)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO love_pages 
+                (slug, title, girl_name, love_message, template_id,
+                 background_image, background_music, effects, images)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             cur.execute(sql, (slug, title, girl_name, love_message, template_id,
-                             background_image, background_music, effects))
+                              background_image, background_music, effects, images_json))
             conn.commit()
         conn.close()
         return jsonify({'success': True, 'message': 'Tạo trang thành công!', 'slug': slug})
@@ -267,13 +270,11 @@ def get_templates():
                     'description': f'Mẫu {template_id}',
                     'preview': None
                 })
-    
     if not templates:
         templates = [
             {'id': 'default', 'name': 'Default', 'description': 'Mẫu mặc định'},
             {'id': 'yesno', 'name': 'Yes/No', 'description': 'Mẫu có nút đồng ý/từ chối'}
         ]
-    
     return jsonify({'success': True, 'templates': templates})
 
 @app.route('/api/templates/<template_id>/preview')
@@ -281,7 +282,8 @@ def preview_template(template_id):
     return render_template(f"templates_mau/{template_id}.html", data={
         'title': 'Xem trước template',
         'girl_name': 'Người yêu',
-        'love_message': 'Đây là bản xem trước của template này'
+        'love_message': 'Đây là bản xem trước của template này',
+        'images': []   # preview không cần ảnh
     })
 
 # ==================== CẬP NHẬT LƯỢT XEM ====================
@@ -308,12 +310,16 @@ def serve_love_page(slug):
             if page_data:
                 cur.execute("UPDATE love_pages SET views = views + 1 WHERE slug = %s", (slug.lower(),))
                 conn.commit()
+                # Parse JSON fields
                 if page_data.get('effects'):
                     page_data['effects'] = json.loads(page_data['effects'])
                 else:
                     page_data['effects'] = {'heart_rain': False, 'confetti': False, 'countdown': None}
+                if page_data.get('images'):
+                    page_data['images'] = json.loads(page_data['images'])
+                else:
+                    page_data['images'] = []
         conn.close()
-        
         if page_data:
             return render_template(f"templates_mau/{page_data['template_id']}.html", data=page_data)
         return render_template('trangchu.html'), 404
@@ -329,19 +335,15 @@ def serve_upload(filename):
 @app.route('/<path:subpath>')
 def serve_subpath(subpath):
     banned_files = ['app.py', 'requirements.txt', '.env', 'wsgi.py']
-    
     if subpath in banned_files or '..' in subpath:
         return render_template('trangchu.html'), 403
-    
     if subpath in ['trangchu.css', 'trangchu.js']:
         return send_from_directory('.', subpath)
-    
     if subpath.endswith('.html'):
         if not session.get('admin_logged_in'):
             return render_template('trangchu.html'), 401
         if os.path.exists(subpath) and os.path.isfile(subpath):
             return send_from_directory('.', subpath)
-    
     return render_template('trangchu.html'), 404
 
 # ==================== CHẠY APP ====================
