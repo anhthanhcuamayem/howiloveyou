@@ -19,8 +19,6 @@
       flex-direction: column;
       gap: 12px;
     }
-
-    /* Toast Item */
     .toast-item {
       background: #1e1e2e;
       border-radius: 12px;
@@ -35,12 +33,10 @@
       opacity: 0;
       transition: all 0.3s ease;
     }
-
     .toast-item.show {
       transform: translateX(0);
       opacity: 1;
     }
-
     .toast-icon {
       width: 28px;
       height: 28px;
@@ -52,16 +48,13 @@
       font-weight: bold;
       flex-shrink: 0;
     }
-
     .toast-icon.success { background: #22c55e; color: white; }
     .toast-icon.error { background: #ef4444; color: white; }
     .toast-icon.warning { background: #f59e0b; color: white; }
     .toast-icon.info { background: #3b82f6; color: white; }
-
     .toast-content { flex: 1; }
     .toast-content h4 { margin: 0; font-size: 16px; font-weight: 600; color: #fff; }
     .toast-content p { margin: 4px 0 0 0; font-size: 13px; color: #a1a1aa; }
-
     .toast-close {
       background: none;
       border: none;
@@ -72,26 +65,17 @@
       transition: color 0.2s;
     }
     .toast-close:hover { color: #fff; }
-
-    /* Modal Animation */
     @keyframes modalPopIn {
       0% { opacity: 0; transform: scale(0.9) translateY(20px); }
       100% { opacity: 1; transform: scale(1) translateY(0); }
     }
-    .modal-show {
-      animation: modalPopIn 0.3s ease forwards !important;
-    }
-    .delete-page-btn {
-      transition: all 0.2s ease;
-    }
-    .delete-page-btn:hover {
-      transform: scale(1.1);
-    }
+    .modal-show { animation: modalPopIn 0.3s ease forwards !important; }
+    .delete-page-btn { transition: all 0.2s ease; }
+    .delete-page-btn:hover { transform: scale(1.1); }
   </style>
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen">
 
-  <!-- Toast Container -->
   <div id="toast-container"></div>
 
   <!-- Login Container -->
@@ -118,7 +102,6 @@
 
   <!-- Dashboard Container -->
   <div id="dashboardContainer" class="hidden">
-    <!-- Header -->
     <div class="bg-white/10 backdrop-blur-lg border-b border-white/20 sticky top-0 z-50">
       <div class="container mx-auto px-6 py-4">
         <div class="flex justify-between items-center flex-wrap gap-4">
@@ -140,27 +123,20 @@
       </div>
     </div>
 
-    <!-- Main Content -->
     <div class="container mx-auto px-6 py-8">
-      <!-- Section: Dashboard -->
+      <!-- Dashboard -->
       <div id="section-dashboard" class="section-content">
         <h2 class="text-3xl font-bold text-white mb-6">📊 Tổng quan</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
             <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-300 text-sm">Tổng số trang</p>
-                <p id="totalPages" class="text-4xl font-bold text-white">0</p>
-              </div>
+              <div><p class="text-gray-300 text-sm">Tổng số trang</p><p id="totalPages" class="text-4xl font-bold text-white">0</p></div>
               <i class="ri-file-copy-line text-5xl text-purple-400"></i>
             </div>
           </div>
           <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
             <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-300 text-sm">Tổng lượt xem</p>
-                <p id="totalViews" class="text-4xl font-bold text-white">0</p>
-              </div>
+              <div><p class="text-gray-300 text-sm">Tổng lượt xem</p><p id="totalViews" class="text-4xl font-bold text-white">0</p></div>
               <i class="ri-eye-line text-5xl text-blue-400"></i>
             </div>
           </div>
@@ -177,13 +153,13 @@
         </div>
       </div>
 
-      <!-- Section: Công cụ (Tools) -->
+      <!-- Tools -->
       <div id="section-tools" class="section-content hidden">
         <h2 class="text-3xl font-bold text-white mb-6">🔧 Danh sách công cụ</h2>
         <div id="toolsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
       </div>
 
-      <!-- Section: Quản lý Trang -->
+      <!-- Pages -->
       <div id="section-pages" class="section-content hidden">
         <div class="flex justify-between items-center mb-6">
           <h2 class="text-3xl font-bold text-white">📄 Quản lý trang</h2>
@@ -201,7 +177,7 @@
         </div>
       </div>
 
-      <!-- Section: Templates -->
+      <!-- Templates -->
       <div id="section-templates" class="section-content hidden">
         <h2 class="text-3xl font-bold text-white mb-6">🎨 Thư viện Template</h2>
         <div id="templatesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
@@ -209,7 +185,7 @@
     </div>
   </div>
 
-  <!-- Modal Tạo Trang (đã thêm album ảnh) -->
+  <!-- Modal Tạo Trang -->
   <div id="createModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
     <div class="bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 border border-white/20">
       <div class="flex justify-between items-center mb-4">
@@ -248,18 +224,31 @@
             <label class="block text-white mb-1">Ảnh nền (tùy chọn)</label>
             <input type="file" name="background_image" accept="image/*" class="w-full text-white">
           </div>
+
+          <!-- Nhạc nền: chọn từ danh sách, nhập URL, hoặc upload file mới -->
           <div>
-            <label class="block text-white mb-1">Nhạc nền (URL hoặc upload)</label>
-            <input type="text" name="music_url" class="w-full px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white mb-2" placeholder="https://...">
+            <label class="block text-white mb-1">🎵 Nhạc nền</label>
+            <div class="flex flex-col gap-2">
+              <select id="musicSelect" class="w-full px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white" onchange="selectMusic(this.value)">
+                <option value="">-- Chọn nhạc có sẵn trong thư viện --</option>
+              </select>
+              <div class="relative my-1">
+                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/20"></div></div>
+                <div class="relative flex justify-center text-xs uppercase"><span class="bg-slate-800 px-2 text-gray-400">Hoặc</span></div>
+              </div>
+              <input type="text" name="music_url" id="musicUrlInput" class="w-full px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white" placeholder="https://example.com/song.mp3">
+              <p class="text-gray-400 text-sm mt-1">Hoặc tải lên file nhạc mới bên dưới</p>
+            </div>
+          </div>
+          <div>
+            <label class="block text-white mb-1">📁 Upload nhạc (tùy chọn)</label>
             <input type="file" name="background_music" accept="audio/*" class="w-full text-white">
           </div>
 
-          <!-- ========== ALBUM ẢNH (tối đa 10 ảnh) ========== -->
+          <!-- Album ảnh -->
           <div>
             <label class="block text-white mb-1">📸 Album ảnh kỷ niệm (tối đa 10 ảnh)</label>
-            <input type="file" name="album_images" accept="image/*" multiple
-                   class="w-full text-white bg-white/10 border border-white/20 rounded-xl p-2"
-                   onchange="previewAlbumImages(this)">
+            <input type="file" name="album_images" accept="image/*" multiple class="w-full text-white bg-white/10 border border-white/20 rounded-xl p-2" onchange="previewAlbumImages(this)">
             <div id="albumPreview" class="flex flex-wrap gap-2 mt-2"></div>
             <p class="text-gray-400 text-sm mt-1">Có thể chọn nhiều ảnh cùng lúc (Ctrl+click hoặc Cmd+click)</p>
           </div>
@@ -290,26 +279,18 @@
           <i class="ri-delete-bin-7-line text-5xl text-red-400"></i>
         </div>
         <h3 class="text-2xl font-bold text-white mb-2">Xác nhận xóa</h3>
-        <p class="text-gray-300 mb-6">
-          Bạn có chắc chắn muốn xóa trang <br>
-          <span id="deletePageTitle" class="font-semibold text-pink-400"></span>?
-        </p>
+        <p class="text-gray-300 mb-6">Bạn có chắc chắn muốn xóa trang <br><span id="deletePageTitle" class="font-semibold text-pink-400"></span>?</p>
         <p class="text-sm text-gray-400 mb-6">Hành động này không thể hoàn tác!</p>
         <div class="flex gap-3">
-          <button id="confirmDeleteBtn" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2">
-            <i class="ri-delete-bin-line"></i> Xóa ngay
-          </button>
-          <button id="cancelDeleteBtn" class="flex-1 bg-white/10 hover:bg-white/20 text-white py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2">
-            <i class="ri-close-line"></i> Hủy
-          </button>
+          <button id="confirmDeleteBtn" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2"><i class="ri-delete-bin-line"></i> Xóa ngay</button>
+          <button id="cancelDeleteBtn" class="flex-1 bg-white/10 hover:bg-white/20 text-white py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2"><i class="ri-close-line"></i> Hủy</button>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // ==================== TOAST SYSTEM ====================
-    let toastId = 0;
+    // Toast
     function showToast(message, type = 'success', title = null) {
       const container = document.getElementById('toast-container');
       if (!container) return;
@@ -320,25 +301,13 @@
       const toast = document.createElement('div');
       toast.className = 'toast-item';
       toast.style.borderLeftColor = borderColors[type];
-      toast.innerHTML = `
-        <div class="toast-icon ${type}">${icons[type] || '✓'}</div>
-        <div class="toast-content">
-          <h4>${finalTitle}</h4>
-          <p>${message}</p>
-        </div>
-        <button class="toast-close" onclick="this.closest('.toast-item').remove()">×</button>
-      `;
+      toast.innerHTML = `<div class="toast-icon ${type}">${icons[type] || '✓'}</div><div class="toast-content"><h4>${finalTitle}</h4><p>${message}</p></div><button class="toast-close" onclick="this.closest('.toast-item').remove()">×</button>`;
       container.appendChild(toast);
       setTimeout(() => toast.classList.add('show'), 10);
-      setTimeout(() => {
-        if (toast && toast.parentNode) {
-          toast.classList.remove('show');
-          setTimeout(() => toast.remove(), 300);
-        }
-      }, 4000);
+      setTimeout(() => { if (toast && toast.parentNode) { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); } }, 4000);
     }
 
-    // ==================== PREVIEW ALBUM ẢNH ====================
+    // Preview album ảnh
     function previewAlbumImages(input) {
       const preview = document.getElementById('albumPreview');
       preview.innerHTML = '';
@@ -351,23 +320,41 @@
             img.src = e.target.result;
             img.className = 'w-20 h-20 object-cover rounded-lg border border-white/30';
             preview.appendChild(img);
-          }
+          };
           reader.readAsDataURL(file);
         });
       }
     }
 
-    // ==================== BIẾN TOÀN CỤC ====================
-    let monthlyChart = null;
-    let currentSection = 'dashboard';
-    let pendingDeleteId = null;
+    // Load danh sách nhạc từ thư mục sound_mau
+    async function loadMusicList() {
+      try {
+        const res = await fetch('/api/sounds');
+        const data = await res.json();
+        if (data.success && data.sounds.length > 0) {
+          const select = document.getElementById('musicSelect');
+          select.innerHTML = '<option value="">-- Chọn nhạc có sẵn --</option>';
+          data.sounds.forEach(sound => {
+            const option = document.createElement('option');
+            option.value = sound.path;
+            option.textContent = sound.name;
+            select.appendChild(option);
+          });
+        }
+      } catch (error) { console.error('Lỗi tải danh sách nhạc:', error); }
+    }
 
-    // ==================== MODAL XÓA ====================
+    function selectMusic(path) {
+      if (path) document.getElementById('musicUrlInput').value = path;
+    }
+
+    // Các hàm xử lý chính
+    let monthlyChart = null, currentSection = 'dashboard', pendingDeleteId = null;
+
     function showDeleteModal(pageId, pageTitle) {
       pendingDeleteId = pageId;
+      document.getElementById('deletePageTitle').textContent = pageTitle;
       const modal = document.getElementById('deleteConfirmModal');
-      const titleSpan = document.getElementById('deletePageTitle');
-      titleSpan.textContent = pageTitle;
       modal.style.display = 'flex';
       modal.classList.remove('hidden');
     }
@@ -382,25 +369,15 @@
       try {
         const res = await fetch(`/api/pages/${pendingDeleteId}`, { method: 'DELETE' });
         const data = await res.json();
-        if (data.success) {
-          showToast('Đã xóa trang thành công', 'success');
-          loadPages();
-          loadDashboardStats();
-        } else {
-          showToast(data.error || 'Không thể xóa trang', 'error');
-        }
-      } catch (error) {
-        showToast('Lỗi khi xóa trang', 'error');
-      }
+        if (data.success) { showToast('Đã xóa trang thành công', 'success'); loadPages(); loadDashboardStats(); }
+        else showToast(data.error || 'Không thể xóa trang', 'error');
+      } catch (error) { showToast('Lỗi khi xóa trang', 'error'); }
       closeDeleteModal();
     }
     document.getElementById('confirmDeleteBtn')?.addEventListener('click', confirmDelete);
     document.getElementById('cancelDeleteBtn')?.addEventListener('click', closeDeleteModal);
-    document.getElementById('deleteConfirmModal')?.addEventListener('click', (e) => {
-      if (e.target === document.getElementById('deleteConfirmModal')) closeDeleteModal();
-    });
+    document.getElementById('deleteConfirmModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('deleteConfirmModal')) closeDeleteModal(); });
 
-    // ==================== CHỨC NĂNG CHÍNH ====================
     async function loadDashboardStats() {
       try {
         const res = await fetch('/api/dashboard-stats');
@@ -409,46 +386,22 @@
           document.getElementById('totalPages').textContent = data.total_pages;
           document.getElementById('totalViews').textContent = data.total_views;
           const topList = document.getElementById('topPagesList');
-          if (data.top_pages.length === 0) {
-            topList.innerHTML = '<p class="text-gray-400">Chưa có dữ liệu</p>';
-          } else {
-            topList.innerHTML = data.top_pages.map((page, i) => `
-              <div class="flex justify-between items-center p-3 bg-white/5 rounded-xl">
-                <div class="flex items-center gap-3"><span class="text-2xl">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '📄'}</span><div><p class="font-semibold">${escapeHtml(page.title)}</p><p class="text-sm text-gray-400">/${page.slug}</p></div></div>
-                <span class="text-pink-400 font-bold">${page.views} lượt</span>
-              </div>
-            `).join('');
-          }
+          if (data.top_pages.length === 0) topList.innerHTML = '<p class="text-gray-400">Chưa có dữ liệu</p>';
+          else topList.innerHTML = data.top_pages.map((page, i) => `<div class="flex justify-between items-center p-3 bg-white/5 rounded-xl"><div class="flex items-center gap-3"><span class="text-2xl">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '📄'}</span><div><p class="font-semibold">${escapeHtml(page.title)}</p><p class="text-sm text-gray-400">/${page.slug}</p></div></div><span class="text-pink-400 font-bold">${page.views} lượt</span></div>`).join('');
           if (monthlyChart) monthlyChart.destroy();
           const ctx = document.getElementById('monthlyChart').getContext('2d');
-          monthlyChart = new Chart(ctx, {
-            type: 'line',
-            data: { labels: data.monthly_stats.map(s => s.month), datasets: [{ label: 'Số trang tạo mới', data: data.monthly_stats.map(s => s.count), borderColor: '#f472b6', backgroundColor: 'rgba(244,114,182,0.1)', tension: 0.4, fill: true }] },
-            options: { responsive: true, plugins: { legend: { labels: { color: 'white' } } } }
-          });
+          monthlyChart = new Chart(ctx, { type: 'line', data: { labels: data.monthly_stats.map(s => s.month), datasets: [{ label: 'Số trang tạo mới', data: data.monthly_stats.map(s => s.count), borderColor: '#f472b6', backgroundColor: 'rgba(244,114,182,0.1)', tension: 0.4, fill: true }] }, options: { responsive: true, plugins: { legend: { labels: { color: 'white' } } } } });
         }
       } catch (error) { console.error(error); showToast('Không thể tải thống kê', 'error'); }
     }
 
     async function loadTools() {
       try {
-        const response = await fetch('/api/cactrang');
-        const tools = await response.json();
-        const toolsGrid = document.getElementById('toolsGrid');
-        if (tools.length === 0) {
-          toolsGrid.innerHTML = `<div class="col-span-full text-center py-12"><i class="ri-tools-line text-6xl text-gray-400 mb-4"></i><p class="text-gray-400 text-lg">Chưa có công cụ nào. Thêm vào file cactrang.txt nhé!</p></div>`;
-          return;
-        }
-        toolsGrid.innerHTML = tools.map((tool, index) => `
-          <div class="card-animate bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 cursor-pointer group" style="animation-delay: ${index * 0.1}s" onclick="window.location.href='/${tool.path}'">
-            <div class="flex items-start justify-between mb-4">
-              <i class="ri-tools-line text-4xl text-purple-400 group-hover:rotate-12 transition-transform duration-300"></i>
-              <i class="ri-arrow-right-up-line text-2xl text-gray-400 group-hover:text-white group-hover:translate-x-1 group-hover:-translate-y-1 transition-all"></i>
-            </div>
-            <h3 class="text-xl font-bold text-white mb-2">${escapeHtml(tool.name)}</h3>
-            <p class="text-gray-300 text-sm">Đường dẫn: /${tool.path}</p>
-          </div>
-        `).join('');
+        const res = await fetch('/api/cactrang');
+        const tools = await res.json();
+        const grid = document.getElementById('toolsGrid');
+        if (tools.length === 0) { grid.innerHTML = `<div class="col-span-full text-center py-12"><i class="ri-tools-line text-6xl text-gray-400 mb-4"></i><p class="text-gray-400 text-lg">Chưa có công cụ nào. Thêm vào file cactrang.txt nhé!</p></div>`; return; }
+        grid.innerHTML = tools.map((tool, idx) => `<div class="card-animate bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 cursor-pointer group" style="animation-delay: ${idx * 0.1}s" onclick="window.location.href='/${tool.path}'"><div class="flex items-start justify-between mb-4"><i class="ri-tools-line text-4xl text-purple-400 group-hover:rotate-12 transition-transform duration-300"></i><i class="ri-arrow-right-up-line text-2xl text-gray-400 group-hover:text-white group-hover:translate-x-1 group-hover:-translate-y-1 transition-all"></i></div><h3 class="text-xl font-bold text-white mb-2">${escapeHtml(tool.name)}</h3><p class="text-gray-300 text-sm">Đường dẫn: /${tool.path}</p></div>`).join('');
       } catch (error) { console.error(error); showToast('Không thể tải danh sách công cụ', 'error'); }
     }
 
@@ -458,19 +411,8 @@
         const data = await res.json();
         const tbody = document.getElementById('pagesTableBody');
         if (data.success && data.pages.length > 0) {
-          tbody.innerHTML = data.pages.map(page => `<tr class="border-b border-white/10 hover:bg-white/5 transition-colors">
-            <td class="px-4 py-3">${page.id}</td>
-            <td class="px-4 py-3 font-semibold">${escapeHtml(page.title)}</td>
-            <td class="px-4 py-3">${escapeHtml(page.girl_name)}</td>
-            <td class="px-4 py-3"><code class="bg-white/10 px-2 py-1 rounded text-sm">${page.slug}</code></td>
-            <td class="px-4 py-3"><span class="bg-purple-500/20 text-purple-300 px-2 py-1 rounded text-xs">${page.template_id}</span></td>
-            <td class="px-4 py-3"><span class="flex items-center gap-1"><i class="ri-eye-line text-gray-400"></i>${page.views}</span></td>
-            <td class="px-4 py-3"><a href="${page.public_url}" target="_blank" class="text-pink-400 hover:text-pink-300 transition-colors flex items-center gap-1"><i class="ri-external-link-line"></i> Xem</a></td>
-            <td class="px-4 py-3"><button onclick="showDeleteModal(${page.id}, '${escapeHtml(page.title).replace(/'/g, "\\'")}')" class="delete-page-btn text-red-400 hover:text-red-300 transition-all"><i class="ri-delete-bin-line text-xl"></i></button></td>
-          </tr>`).join('');
-        } else {
-          tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-gray-400"><i class="ri-inbox-line text-4xl mb-2 block"></i>Chưa có trang nào</td></tr>';
-        }
+          tbody.innerHTML = data.pages.map(page => `<tr class="border-b border-white/10 hover:bg-white/5 transition-colors"><td class="px-4 py-3">${page.id}</td><td class="px-4 py-3 font-semibold">${escapeHtml(page.title)}</td><td class="px-4 py-3">${escapeHtml(page.girl_name)}</td><td class="px-4 py-3"><code class="bg-white/10 px-2 py-1 rounded text-sm">${page.slug}</code></td><td class="px-4 py-3"><span class="bg-purple-500/20 text-purple-300 px-2 py-1 rounded text-xs">${page.template_id}</span></td><td class="px-4 py-3"><span class="flex items-center gap-1"><i class="ri-eye-line text-gray-400"></i>${page.views}</span></td><td class="px-4 py-3"><a href="${page.public_url}" target="_blank" class="text-pink-400 hover:text-pink-300 transition-colors flex items-center gap-1"><i class="ri-external-link-line"></i> Xem</a></td><td class="px-4 py-3"><button onclick="showDeleteModal(${page.id}, '${escapeHtml(page.title).replace(/'/g, "\\'")}')" class="delete-page-btn text-red-400 hover:text-red-300 transition-all"><i class="ri-delete-bin-line text-xl"></i></button></td></tr>`).join('');
+        } else tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-gray-400"><i class="ri-inbox-line text-4xl mb-2 block"></i>Chưa có trang nào</td></tr>';
       } catch (error) { console.error(error); showToast('Không thể tải danh sách trang', 'error'); }
     }
 
@@ -480,14 +422,7 @@
         const data = await res.json();
         const container = document.getElementById('templatesList');
         if (data.success && data.templates.length > 0) {
-          container.innerHTML = data.templates.map(tpl => `
-            <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 text-center">
-              <div class="text-5xl mb-3">🎨</div>
-              <h3 class="text-xl font-bold text-white mb-2">${escapeHtml(tpl.name)}</h3>
-              <p class="text-gray-300 text-sm mb-4">${escapeHtml(tpl.description)}</p>
-              <button onclick="previewTemplate('${tpl.id}')" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-xl">Xem trước</button>
-            </div>
-          `).join('');
+          container.innerHTML = data.templates.map(tpl => `<div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 text-center"><div class="text-5xl mb-3">🎨</div><h3 class="text-xl font-bold text-white mb-2">${escapeHtml(tpl.name)}</h3><p class="text-gray-300 text-sm mb-4">${escapeHtml(tpl.description)}</p><button onclick="previewTemplate('${tpl.id}')" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-xl">Xem trước</button></div>`).join('');
         }
       } catch (error) { console.error(error); showToast('Không thể tải templates', 'error'); }
     }
@@ -504,67 +439,38 @@
       if (section === 'templates') loadTemplates();
     }
 
-    function showCreateModal() {
-      document.getElementById('createModal').classList.remove('hidden');
-      document.getElementById('createModal').style.display = 'flex';
-    }
-    function closeCreateModal() {
-      document.getElementById('createModal').style.display = 'none';
-    }
-
+    function showCreateModal() { document.getElementById('createModal').classList.remove('hidden'); document.getElementById('createModal').style.display = 'flex'; }
+    function closeCreateModal() { document.getElementById('createModal').style.display = 'none'; }
     function escapeHtml(str) { if (!str) return ''; const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
 
-    // ==================== XỬ LÝ FORM TẠO TRANG ====================
+    // Submit form tạo trang
     document.getElementById('createPageForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
       try {
         const res = await fetch('/api/create-page', { method: 'POST', body: formData });
         const data = await res.json();
-        if (data.success) {
-          showToast('Tạo trang thành công!', 'success');
-          closeCreateModal();
-          loadPages();
-          loadDashboardStats();
-          e.target.reset();
-          document.getElementById('albumPreview').innerHTML = ''; // xóa preview ảnh
-        } else showToast(data.error || data.message, 'error');
+        if (data.success) { showToast('Tạo trang thành công!', 'success'); closeCreateModal(); loadPages(); loadDashboardStats(); e.target.reset(); document.getElementById('albumPreview').innerHTML = ''; }
+        else showToast(data.error || data.message, 'error');
       } catch (error) { showToast('Lỗi khi tạo trang', 'error'); }
     });
 
-    // ==================== LOGIN / LOGOUT ====================
+    // Login
     document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       try {
         const res = await fetch('/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: document.getElementById('username').value, password: document.getElementById('password').value }) });
         const data = await res.json();
-        if (data.success) {
-          showToast('Đăng nhập thành công!', 'success');
-          document.getElementById('loginContainer').classList.add('hidden');
-          document.getElementById('dashboardContainer').classList.remove('hidden');
-          showSection('dashboard');
-        } else showToast(data.message, 'error');
+        if (data.success) { showToast('Đăng nhập thành công!', 'success'); document.getElementById('loginContainer').classList.add('hidden'); document.getElementById('dashboardContainer').classList.remove('hidden'); showSection('dashboard'); loadMusicList(); }
+        else showToast(data.message, 'error');
       } catch (error) { showToast('Lỗi kết nối đến server', 'error'); }
     });
 
-    document.getElementById('logoutBtn')?.addEventListener('click', async () => {
-      await fetch('/logout', { method: 'POST' });
-      showToast('Đã đăng xuất', 'info');
-      document.getElementById('loginContainer').classList.remove('hidden');
-      document.getElementById('dashboardContainer').classList.add('hidden');
-    });
+    // Logout
+    document.getElementById('logoutBtn')?.addEventListener('click', async () => { await fetch('/logout', { method: 'POST' }); showToast('Đã đăng xuất', 'info'); document.getElementById('loginContainer').classList.remove('hidden'); document.getElementById('dashboardContainer').classList.add('hidden'); });
 
-    // ==================== KIỂM TRA SESSION ====================
-    (async () => {
-      try {
-        const res = await fetch('/api/dashboard-stats');
-        if (res.ok) {
-          document.getElementById('loginContainer').classList.add('hidden');
-          document.getElementById('dashboardContainer').classList.remove('hidden');
-          showSection('dashboard');
-        }
-      } catch(e) {}
-    })();
+    // Auto check session
+    (async () => { try { const res = await fetch('/api/dashboard-stats'); if (res.ok) { document.getElementById('loginContainer').classList.add('hidden'); document.getElementById('dashboardContainer').classList.remove('hidden'); showSection('dashboard'); loadMusicList(); } } catch(e) {} })();
   </script>
 </body>
 </html>
