@@ -75,24 +75,15 @@
 
     /* Modal Animation */
     @keyframes modalPopIn {
-      0% {
-        opacity: 0;
-        transform: scale(0.9) translateY(20px);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
+      0% { opacity: 0; transform: scale(0.9) translateY(20px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
     }
-    
     .modal-show {
       animation: modalPopIn 0.3s ease forwards !important;
     }
-    
     .delete-page-btn {
       transition: all 0.2s ease;
     }
-    
     .delete-page-btn:hover {
       transform: scale(1.1);
     }
@@ -218,7 +209,7 @@
     </div>
   </div>
 
-  <!-- Modal Tạo Trang -->
+  <!-- Modal Tạo Trang (đã thêm album ảnh) -->
   <div id="createModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
     <div class="bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 border border-white/20">
       <div class="flex justify-between items-center mb-4">
@@ -262,6 +253,17 @@
             <input type="text" name="music_url" class="w-full px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white mb-2" placeholder="https://...">
             <input type="file" name="background_music" accept="audio/*" class="w-full text-white">
           </div>
+
+          <!-- ========== ALBUM ẢNH (tối đa 10 ảnh) ========== -->
+          <div>
+            <label class="block text-white mb-1">📸 Album ảnh kỷ niệm (tối đa 10 ảnh)</label>
+            <input type="file" name="album_images" accept="image/*" multiple
+                   class="w-full text-white bg-white/10 border border-white/20 rounded-xl p-2"
+                   onchange="previewAlbumImages(this)">
+            <div id="albumPreview" class="flex flex-wrap gap-2 mt-2"></div>
+            <p class="text-gray-400 text-sm mt-1">Có thể chọn nhiều ảnh cùng lúc (Ctrl+click hoặc Cmd+click)</p>
+          </div>
+
           <div class="border-t border-white/20 pt-4">
             <h3 class="text-white font-semibold mb-2">🎉 Hiệu ứng đặc biệt</h3>
             <label class="flex items-center gap-2 text-white"><input type="checkbox" name="heart_rain" value="true"> 💖 Mưa tim</label>
@@ -280,7 +282,7 @@
     </div>
   </div>
 
-  <!-- Modal Xác Nhận Xóa (Đẹp) -->
+  <!-- Modal Xác Nhận Xóa -->
   <div id="deleteConfirmModal" class="fixed inset-0 bg-black/70 backdrop-blur-md hidden items-center justify-center z-50 p-4">
     <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl max-w-md w-full p-6 border border-red-500/30 shadow-2xl" id="deleteModalContent">
       <div class="text-center">
@@ -308,16 +310,13 @@
   <script>
     // ==================== TOAST SYSTEM ====================
     let toastId = 0;
-
     function showToast(message, type = 'success', title = null) {
       const container = document.getElementById('toast-container');
       if (!container) return;
-
       const titles = { success: 'Thành công!', error: 'Lỗi!', warning: 'Cảnh báo!', info: 'Thông báo' };
       const finalTitle = title || titles[type] || 'Thông báo';
       const icons = { success: '✓', error: '✗', warning: '⚠', info: 'ℹ' };
       const borderColors = { success: '#22c55e', error: '#ef4444', warning: '#f59e0b', info: '#3b82f6' };
-
       const toast = document.createElement('div');
       toast.className = 'toast-item';
       toast.style.borderLeftColor = borderColors[type];
@@ -339,6 +338,25 @@
       }, 4000);
     }
 
+    // ==================== PREVIEW ALBUM ẢNH ====================
+    function previewAlbumImages(input) {
+      const preview = document.getElementById('albumPreview');
+      preview.innerHTML = '';
+      if (input.files) {
+        const files = Array.from(input.files).slice(0, 10);
+        files.forEach(file => {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.className = 'w-20 h-20 object-cover rounded-lg border border-white/30';
+            preview.appendChild(img);
+          }
+          reader.readAsDataURL(file);
+        });
+      }
+    }
+
     // ==================== BIẾN TOÀN CỤC ====================
     let monthlyChart = null;
     let currentSection = 'dashboard';
@@ -353,33 +371,29 @@
       modal.style.display = 'flex';
       modal.classList.remove('hidden');
     }
-
     function closeDeleteModal() {
       const modal = document.getElementById('deleteConfirmModal');
       modal.style.display = 'none';
       modal.classList.add('hidden');
       pendingDeleteId = null;
     }
-
     async function confirmDelete() {
       if (!pendingDeleteId) return;
       try {
         const res = await fetch(`/api/pages/${pendingDeleteId}`, { method: 'DELETE' });
         const data = await res.json();
-        if (data.success) { 
-          showToast('Đã xóa trang thành công', 'success'); 
-          loadPages(); 
-          loadDashboardStats(); 
-        } else { 
-          showToast(data.error || 'Không thể xóa trang', 'error'); 
+        if (data.success) {
+          showToast('Đã xóa trang thành công', 'success');
+          loadPages();
+          loadDashboardStats();
+        } else {
+          showToast(data.error || 'Không thể xóa trang', 'error');
         }
-      } catch (error) { 
-        showToast('Lỗi khi xóa trang', 'error'); 
+      } catch (error) {
+        showToast('Lỗi khi xóa trang', 'error');
       }
       closeDeleteModal();
     }
-
-    // Gắn sự kiện modal
     document.getElementById('confirmDeleteBtn')?.addEventListener('click', confirmDelete);
     document.getElementById('cancelDeleteBtn')?.addEventListener('click', closeDeleteModal);
     document.getElementById('deleteConfirmModal')?.addEventListener('click', (e) => {
@@ -480,13 +494,13 @@
 
     function previewTemplate(templateId) { window.open(`/api/templates/${templateId}/preview`, '_blank'); }
 
-    function showSection(section) { 
+    function showSection(section) {
       currentSection = section;
       document.querySelectorAll('.section-content').forEach(el => el.classList.add('hidden'));
       document.getElementById(`section-${section}`).classList.remove('hidden');
-      if (section === 'dashboard') loadDashboardStats(); 
+      if (section === 'dashboard') loadDashboardStats();
       if (section === 'tools') loadTools();
-      if (section === 'pages') loadPages(); 
+      if (section === 'pages') loadPages();
       if (section === 'templates') loadTemplates();
     }
 
@@ -494,61 +508,62 @@
       document.getElementById('createModal').classList.remove('hidden');
       document.getElementById('createModal').style.display = 'flex';
     }
-
     function closeCreateModal() {
       document.getElementById('createModal').style.display = 'none';
     }
 
     function escapeHtml(str) { if (!str) return ''; const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
 
-    // ==================== XỬ LÝ FORM ====================
+    // ==================== XỬ LÝ FORM TẠO TRANG ====================
     document.getElementById('createPageForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
       try {
         const res = await fetch('/api/create-page', { method: 'POST', body: formData });
         const data = await res.json();
-        if (data.success) { 
-          showToast('Tạo trang thành công!', 'success'); 
-          closeCreateModal(); 
-          loadPages(); 
-          loadDashboardStats(); 
+        if (data.success) {
+          showToast('Tạo trang thành công!', 'success');
+          closeCreateModal();
+          loadPages();
+          loadDashboardStats();
           e.target.reset();
+          document.getElementById('albumPreview').innerHTML = ''; // xóa preview ảnh
         } else showToast(data.error || data.message, 'error');
       } catch (error) { showToast('Lỗi khi tạo trang', 'error'); }
     });
 
+    // ==================== LOGIN / LOGOUT ====================
     document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       try {
         const res = await fetch('/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: document.getElementById('username').value, password: document.getElementById('password').value }) });
         const data = await res.json();
-        if (data.success) { 
-          showToast('Đăng nhập thành công!', 'success'); 
+        if (data.success) {
+          showToast('Đăng nhập thành công!', 'success');
           document.getElementById('loginContainer').classList.add('hidden');
           document.getElementById('dashboardContainer').classList.remove('hidden');
-          showSection('dashboard'); 
+          showSection('dashboard');
         } else showToast(data.message, 'error');
       } catch (error) { showToast('Lỗi kết nối đến server', 'error'); }
     });
 
-    document.getElementById('logoutBtn')?.addEventListener('click', async () => { 
-      await fetch('/logout', { method: 'POST' }); 
+    document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+      await fetch('/logout', { method: 'POST' });
       showToast('Đã đăng xuất', 'info');
       document.getElementById('loginContainer').classList.remove('hidden');
       document.getElementById('dashboardContainer').classList.add('hidden');
     });
 
     // ==================== KIỂM TRA SESSION ====================
-    (async () => { 
-      try { 
-        const res = await fetch('/api/dashboard-stats'); 
+    (async () => {
+      try {
+        const res = await fetch('/api/dashboard-stats');
         if (res.ok) {
           document.getElementById('loginContainer').classList.add('hidden');
           document.getElementById('dashboardContainer').classList.remove('hidden');
-          showSection('dashboard'); 
+          showSection('dashboard');
         }
-      } catch(e) {} 
+      } catch(e) {}
     })();
   </script>
 </body>
