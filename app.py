@@ -175,6 +175,20 @@ def update_page(page_id):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+# ==================== API: KIỂM TRA SLUG TỒN TẠI ====================
+@app.route('/api/check-slug/<slug>')
+@login_required
+def check_slug(slug):
+    try:
+        conn = get_db_connection()
+        with conn.cursor() as cur:
+            cur.execute("SELECT id FROM love_pages WHERE slug = %s", (slug.lower().strip(),))
+            exists = cur.fetchone() is not None
+        conn.close()
+        return jsonify({'exists': exists})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # ==================== API: LẤY DANH SÁCH NHẠC TỪ THƯ MỤC SOUND_MAU ====================
 @app.route('/api/sounds')
 @login_required
@@ -193,7 +207,7 @@ def get_sounds():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-# ==================== API: TẠO TRANG MỚI (HỖ TRỢ ALBUM ẢNH) ====================
+# ==================== API: TẠO TRANG MỚI ====================
 @app.route('/api/create-page', methods=['POST'])
 @login_required
 def create_page():
@@ -204,7 +218,7 @@ def create_page():
     love_message = data.get('love_message', '').strip()
     template_id = data.get('template_id', 'default').strip()
 
-    # Xử lý ảnh nền (1 ảnh chính)
+    # Xử lý ảnh nền
     background_image = None
     if 'background_image' in request.files:
         file = request.files['background_image']
@@ -215,7 +229,7 @@ def create_page():
             file.save(f"uploads/backgrounds/{filename}")
             background_image = f"/uploads/backgrounds/{filename}"
 
-    # Xử lý nhạc nền (ưu tiên URL từ input music_url, sau đó mới đến file upload)
+    # Xử lý nhạc nền (ưu tiên URL, sau đó upload)
     background_music = data.get('music_url', '').strip()
     if not background_music and 'background_music' in request.files:
         file = request.files['background_music']
@@ -226,7 +240,7 @@ def create_page():
             file.save(f"uploads/music/{filename}")
             background_music = f"/uploads/music/{filename}"
 
-    # Xử lý album ảnh (tối đa 10 ảnh)
+    # Xử lý album ảnh
     image_list = []
     if 'album_images' in request.files:
         files = request.files.getlist('album_images')
@@ -254,6 +268,7 @@ def create_page():
     try:
         conn = get_db_connection()
         with conn.cursor() as cur:
+            # Kiểm tra lại slug lần cuối
             cur.execute("SELECT id FROM love_pages WHERE slug = %s", (slug,))
             if cur.fetchone():
                 return jsonify({'success': False, 'message': 'Slug này đã tồn tại!'}), 400
@@ -317,7 +332,7 @@ def update_views(slug):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-# ==================== TRANG PUBLIC (/p/slug) ====================
+# ==================== TRANG PUBLIC ====================
 @app.route('/p/<slug>')
 def serve_love_page(slug):
     try:
